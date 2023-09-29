@@ -23,10 +23,18 @@ RUN ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 unixodbc-dev
 
 RUN echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
 
-ADD scripts /scripts
-RUN chmod -R +x /scripts
-
 RUN python3 -m venv /app/
+
+ADD visits/ /app/visits/
+ADD scripts /scripts
+RUN groupadd -r acait -g 1000 && \
+    useradd -u 1000 -rm -g acait -d /home/acait -s /bin/bash -c "container user" acait &&\
+    chown -R acait:acait /app &&\
+    chown -R acait:acait /scripts &&\
+    chown -R acait:acait /home/acait &&\
+    chmod -R +x /scripts /app/visits/tasks
+
+USER acait
 
 RUN . /app/bin/activate && \
     /app/bin/pip install wheel gunicorn django-prometheus croniter pyodbc

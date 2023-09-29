@@ -19,7 +19,7 @@ daemon:
     - name: expire-endorsees
       replicaCount: 1
       command: ["/app/run_task.sh"]
-      args: ["--cron", "3,33 7-18 * * 1-5", "/app/conveyor.py"]
+      args: ["--cron", "3,33 7-18 * * 1-5", "/app/visits/conveyor.py"]
       resources:
         limits:
           cpu: 500m

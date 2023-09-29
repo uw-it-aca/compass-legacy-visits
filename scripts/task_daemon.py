@@ -1,7 +1,7 @@
+#!/usr/bin/env python
+
 # Copyright 2023 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
-
-#!/usr/bin/env python
 
 from call_command import CallCommand
 import sys
@@ -46,7 +46,7 @@ def main():
     if loop_delay is None and cron_spec is None:
         loop_delay = default_loop_delay
     CallCommand(is_daemon=True,
-                command=f'/app/uw_person_datastore/tasks/{command}',
+                command=f'/app/visits/tasks/{command}.py',
                 options=options,
                 cron_spec=cron_spec,
                 loop_delay=loop_delay).run()
