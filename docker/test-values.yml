@@ -1,0 +1,116 @@
+deployment:
+  enabled: false
+
+service:
+  enabled: false
+
+lifecycle:
+  enabled: false
+
+repo: compass-visits
+instance: test
+
+cronjob:
+  enabled: false
+
+daemon:
+  enabled: true
+  daemons:
+    - name: expire-endorsees
+      replicaCount: 1
+      command: ["/app/run_task.sh"]
+      args: ["--cron", "3,33 7-18 * * 1-5", "/app/conveyor.py"]
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+      sidecarContainers:
+        forwarder:
+          image: "gcr.io/uwit-mci-axdd/uw-ssh-client:4aad3bd"
+          environmentVariables:
+            - name: PROXY_ID_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: compass-test-visits-secrets
+                  key: proxy-id-key
+            - name: PROXY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: compass-test-visits-secrets
+                  key: proxy-id
+            - name: PROXY_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: compass-test-visits-secrets
+                  key: proxy-hostname
+            - name: TARGET_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: compass-test-visits-secrets
+                  key: legacy-db-host
+            - name: TARGET_PORT
+              value: "1433"
+            - name: LOCAL_PORT
+              value: "1433"
+          command:
+            - "sh"
+            - "-c"
+            - 'mkdir -m 0700 ~/.ssh && echo "${PROXY_ID_KEY}" > ~/.ssh/id_ecdsa && chmod 400 ~/.ssh/id_ecdsa && ssh ${PROXY_ID}@${PROXY_HOSTNAME} -o StrictHostKeyChecking=no -N -L 127.0.0.1:${LOCAL_PORT}:${TARGET_HOSTNAME}:${TARGET_PORT}'
+
+environmentVariables:
+  - name: ENV
+    value: test
+
+externalSecrets:
+  enabled: true
+  secrets:
+    - name: compass-test-visits-secrets
+      externalKey: compass-visits/common/secrets
+      data:
+        - name: visits-api-host
+          property: visits-api-host
+        - name: visits-api-token
+          property: visits-api-token
+        - name: legacy-db-host
+          property: legacy-db-host
+        - name: legacy-db-name
+          property: legacy-db-name
+        - name: legacy-db-username
+          property: legacy-db-username
+        - name: legacy-db-password
+          property: legacy-db-password
+        - name: proxy-id-key
+          property: proxy-id-key
+        - name: proxy-id
+          property: proxy-id
+        - name: proxy-hostname
+          property: proxy-hostname
+
+environmentVariablesSecrets:
+  compassVisitAPIHost:
+    name: VISITS_API_HOST
+    secretName: compass-test-visits-secrets
+    secretKey: visits-api-host
+  compassVisitAPIToken:
+    name: VISITS_API_TOKEN
+    secretName: compass-test-visits-secrets
+    secretKey: visits-api-token
+  legacyDBHost:
+    name: LEGACY_DB_HOST
+    secretName: compass-test-visits-secrets
+    secretKey: legacy-db-host
+  legacyDBName:
+    name: LEGACY_DB_NAME
+    secretName: compass-test-visits-secrets
+    secretKey: legacy-db-name
+  legacyDBUsername:
+    name: LEGACY_DB_USERNAME
+    secretName: compass-test-visits-secrets
+    secretKey: legacy-db-username
+  legacyDBPassword:
+    name: LEGACY_DB_PASSWORD
+    secretName: compass-test-visits-secrets
+    secretKey: legacy-db-password
