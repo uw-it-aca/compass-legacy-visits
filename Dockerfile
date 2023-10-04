@@ -37,6 +37,7 @@ RUN groupadd -r acait -g 1000 && \
 #disable while debugging
 #USER acait
 
-RUN . /app/bin/activate && /app/bin/pip install wheel croniter pyodbc pymssql
+RUN . /app/bin/activate && \
+    /app/bin/pip install wheel django-prometheus croniter pyodbc pymssql
 
 CMD ["bash", "-c", "tail -f /dev/null"]
