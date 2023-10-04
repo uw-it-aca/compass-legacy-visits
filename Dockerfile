@@ -34,9 +34,9 @@ RUN groupadd -r acait -g 1000 && \
     chown -R acait:acait /home/acait &&\
     chmod -R +x /scripts /app/visits/tasks
 
-USER acait
+#disable while debugging
+#USER acait
 
-RUN . /app/bin/activate && \
-    /app/bin/pip install wheel gunicorn django-prometheus croniter pyodbc
+RUN . /app/bin/activate && /app/bin/pip install wheel croniter pyodbc pymssql
 
 CMD ["bash", "-c", "tail -f /dev/null"]
