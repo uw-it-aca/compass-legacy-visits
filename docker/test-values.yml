@@ -67,6 +67,8 @@ environmentVariables:
     value: test
   - name: UW_PERSON_CLIENT_ENV
     value: PROD
+  - name: VISITS_API_HOST
+    value: compass-prod-test
 
 externalSecrets:
   enabled: true
@@ -107,10 +109,6 @@ externalSecrets:
           property: person-db-database
 
 environmentVariablesSecrets:
-  compassVisitAPIHost:
-    name: VISITS_API_HOST
-    secretName: compass-test-visits-secrets
-    secretKey: visits-api-host
   compassVisitAPIToken:
     name: VISITS_API_TOKEN
     secretName: compass-test-visits-secrets

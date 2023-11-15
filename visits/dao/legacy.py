@@ -44,9 +44,8 @@ def _run_query(database, query):
 
     user = os.getenv("LEGACY_DB_USERNAME")
     password = os.getenv("LEGACY_DB_PASSWORD")
-    server = os.getenv("LEGACY_DB_HOST")
     constring = "Driver={FreeTDS};" \
-                f"SERVERNAME={server};" \
+                "SERVERNAME=compass;" \
                 f"Database={database};" \
                 "Port=1433;" \
                 "TDS_Version=7.2;" \

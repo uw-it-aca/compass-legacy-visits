@@ -27,6 +27,7 @@ def store_visit(visit):
     }
 
     _store_visit_data(visit_data)
+    return visit_data
 
 
 def _store_visit_data(visit_data):
@@ -80,5 +81,5 @@ def _get_netid(student_number):
             include_student_advisers=False, include_student_majors=False,
             include_student_pending_majors=False,
             include_student_holds=False, include_student_degrees=False)
-        known_netids[student_number] = person.student.uwnetid
-        return person.student.uwnetid
+        known_netids[student_number] = person.uwnetid
+        return person.uwnetid

@@ -32,7 +32,10 @@ def convey(hours=48):
 
     for index, visit in visits.iterrows():
         try:
-            store_visit(visit)
+            visit_data = store_visit(visit)
+            logger.info(f"store_visit: added {visit_data['student_netid']} "
+                        f"for {visit_data['course_code']} "
+                        f"at {visit_data['checkin_date']}")
         except Exception as ex:
             logger.error(f"store_visit: {ex}")
 
