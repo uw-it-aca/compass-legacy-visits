@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-
 # Copyright 2023 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
+
+#!/usr/bin/env python
 
 from visits.dao.legacy import get_visits
 from visits.dao.compass import store_visit
@@ -16,16 +16,17 @@ def setup_logging():
     return logging.getLogger()
 
 
-def convey():
+def convey(hours=48):
+
     logger = setup_logging()
     logger.info("conveyor: start")
 
-    d = datetime.today() - timedelta(days=1)
+    since_date = datetime.today() - timedelta(hours=hours)
 
-    logger.info(f"conveyor: gathering visits since {d}")
+    logger.info(f"conveyor: gathering visits since {since_date}")
 
     try:
-        visits = get_visits(d.strftime('%Y-%m-%d'))
+        visits = get_visits(since_date)
     except Exception as ex:
         logger.error(f"get_visits: {ex}")
 
@@ -39,4 +40,4 @@ def convey():
 
 
 if __name__ == '__main__':
-    convey()
+    convey(48)

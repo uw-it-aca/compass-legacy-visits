@@ -1,26 +1,46 @@
 # Copyright 2023 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
-#from uw_person_client import UWPersonClient
-#from uw_person_client.exceptions import PersonNotFoundException
+from commonconf.backends import use_configparser_backend
+from uw_person_client import UWPersonClient
 from datetime import datetime
+import urllib3
 import pytz
+import os
 
 
-#uw_person = UWPersonClient()
+use_configparser_backend("/app/person.cfg", "compass")
+
+
+uw_person = UWPersonClient()
 known_netids = {}
 
 
 def store_visit(visit):
-    student_number = str(visit['student_no']).zfill(7)
-    import pdb; pdb.set_trace()
-    date = visit['Date']
-    checkin = _get_checkin_date(visit)
-    checkout = _get_checkout_date(visit)
-    course_code = _get_course_code(visit)
-    visit_type = visit['Contact_Type']
+    student_no = str(visit['student_no']).zfill(7)
+    visit_data = {
+        "student_netid": _get_netid(student_no),
+        "visit_type": _get_visit_type(visit),
+        "course_code": _get_course_code(visit),
+        "checkin_date": _get_checkin_date(visit),
+        "checkout_date": _get_checkout_date(visit)
+    }
 
-    print(f"{student_number}: {checkin} to {checkout}")
+    _store_visit_data(visit_data)
+
+
+def _store_visit_data(visit_data):
+    host = os.getenv('VISITS_API_HOST')
+    token = os.getenv('VISITS_API_TOKEN')
+    url = f"http://{host}/api/v1/visit/omad"
+
+    http = urllib3.PoolManager()
+    headers = urllib3.make_headers(authorization=f"Bearer {token}")
+    response = http.urlopen('POST', url, headers=headers, data=visit_data)
+
+
+def _get_visit_type(visit):
+    return visit['Contact_Type']
 
 
 def _get_course_code(visit):
@@ -49,17 +69,16 @@ def _get_checkout_date(visit):
         second=time.second).astimezone(pytz.utc)
 
 
-#def _get_student_netid(student_number):
-#    try:
-#        netid = known_netids[student_number]
-#    except KeyError:
-#        person = uw_person.get_person_by_student_number(
-#            student_number, include_employee=False, include_student=True,
-#            include_student_transcripts=False,
-#            include_student_transfers=False, include_student_sports=False,
-#            include_student_advisers=False, include_student_majors=False,
-#            include_student_pending_majors=False,
-#            include_student_holds=False, include_student_degrees=False)
-#        netid = person.student.netid
-#        known_netids[student_number] = netid
-#        return netid
+def _get_netid(student_number):
+    try:
+        netid = known_netids[student_number]
+    except KeyError:
+        person = uw_person.get_person_by_student_number(
+            student_number, include_employee=False, include_student=True,
+            include_student_transcripts=False,
+            include_student_transfers=False, include_student_sports=False,
+            include_student_advisers=False, include_student_majors=False,
+            include_student_pending_majors=False,
+            include_student_holds=False, include_student_degrees=False)
+        known_netids[student_number] = person.student.uwnetid
+        return person.student.uwnetid

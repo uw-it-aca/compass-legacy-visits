@@ -1,3 +1,6 @@
+# Copyright 2023 UW-IT, University of Washington
+# SPDX-License-Identifier: Apache-2.0
+
 #!/usr/bin/env python
 
 import os
@@ -24,6 +27,7 @@ setup(
         'pyodbc<5',
         'pandas~=1.1',
         'urllib3~=1.25',
+        'commonconf',
         'pymssql==2.2.2',
         'axdd-person-client>=1.1.18',
     ],

@@ -1,15 +1,25 @@
 # Copyright 2023 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 import pyodbc
 import pandas
+from datetime import datetime, timedelta
+import os
 
 
 DB = os.getenv("LEGACY_DB_NAME")
 
 
 def get_visits(since_date):
+    date = since_date.strftime('%Y-%m-%d')
+    time = since_date.strftime('%H:%M:%S')
+
+    time_clause = f"( Date >= '{date} 00:00:00.000' AND Time_In >= '{time}' )"
+    now = datetime.now()
+    if since_date.date() < now.date():
+        next_day = (since_date + timedelta(days=1)).strftime('%Y-%m-%d')
+        time_clause = f"( {time_clause} OR Date >= '{next_day} 00:00:00.000' )"
+
     db_query = f"""
         SELECT
             student_no,
@@ -19,12 +29,11 @@ def get_visits(since_date):
             Time_Out,
             Event_Type
         FROM
-          appointment
+            appointment
         WHERE
-          Date >= '{since_date} 00:00:00.000'
-          AND Contact_Type like 'IC%'
+            {time_clause}
+            AND Contact_Type like 'IC%'
     """
-
     results = _run_query(DB, db_query)
     return results
 

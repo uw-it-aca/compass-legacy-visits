@@ -49,22 +49,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-$(echo ${{ hashFiles('Dockerfile') }} | head -c 16)
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
       - name: Build App Image
         uses: docker/build-push-action@v3
         with:
           tags: ${{ needs.context.outputs.image_tag }}
           push: false
           load: true
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-from: type=gha
+          cache-to: type=gha
 
       - name: Push Image to GCR
         if: github.event_name == 'push'
