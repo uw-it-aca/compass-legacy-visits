@@ -1,43 +1,55 @@
-FROM ubuntu:20.04 as legacy-compass-container
+FROM ubuntu:20.04 as app-container
+
+WORKDIR /app/
 ENV PYTHONUNBUFFERED 1
-ENV TZ America/Los_Angeles
 
-RUN apt-get update -y && apt-get -y install curl lsb-release && \
-    curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc && \
-    curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
+USER root
 
-# Install system dependencies
-ARG DEBIAN_FRONTEND=noninteractive
+# install system dependencies
 RUN apt-get update -y && \
-  apt-get upgrade -y && \
-  apt-get dist-upgrade -y && \
-  apt-get clean && \
-  apt-get install -y \
-  build-essential \
-  python-setuptools \
-  python3.8-dev \
-  python3-venv \
-  python3-pip
+    apt-get upgrade -y && \
+    apt-get dist-upgrade -y && \
+    apt-get clean all && \
+    apt-get install -y \
+    hostname \
+    locales \
+    openssl \
+    curl \
+    wget \
+    python-setuptools \
+    build-essential\
+    python-setuptools \
+    python3.8-dev \
+    python3-venv \
+    python3-pip \
+    libpq-dev \
+    unixodbc-dev \
+    freetds-dev
 
-RUN ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18 unixodbc-dev
+RUN apt-get update && apt-get install -y tdsodbc
 
-RUN echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
+RUN locale-gen en_US.UTF-8
+# locale.getdefaultlocale() searches in this order
+ENV LANGUAGE en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+ENV LC_CTYPE en_US.UTF-8
+ENV LANG en_US.UTF-8
 
+# create python virtualenv
 RUN python3 -m venv /app/
 
-ADD visits/ /app/visits/
-ADD scripts /scripts
+RUN /app/bin/pip install wheel croniter
+
+ADD . /app/
+
 RUN groupadd -r acait -g 1000 && \
-    useradd -u 1000 -rm -g acait -d /home/acait -s /bin/bash -c "container user" acait &&\
-    chown -R acait:acait /app &&\
-    chown -R acait:acait /scripts &&\
-    chown -R acait:acait /home/acait &&\
-    chmod -R +x /scripts /app/visits/tasks
+    useradd -u 1000 -rm -g acait -d /home/acait -s /bin/bash -c "container user" acait && \
+    chown -R acait:acait /app /home/acait && \
+    chmod -R +x /app/scripts /app/visits/tasks
 
-#disable while debugging
-#USER acait
+USER acait
 
-RUN . /app/bin/activate && \
-    /app/bin/pip install wheel django-prometheus croniter pyodbc pymssql
+RUN . /app/bin/activate && pip install -r requirements.txt
 
 CMD ["bash", "-c", "tail -f /dev/null"]
+

@@ -3,54 +3,40 @@
 # Copyright 2023 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
-#from datetime import datetime, timedelta
-#import pandas as pd
-#import pyodbc
-import os
+from visits.dao.legacy import get_visits
+from visits.dao.compass import store_visit
+from datetime import datetime, timedelta
+import pandas
 import sys
 import logging
 
-mssql_driver = '{/opt/microsoft/msodbcsql18/lib64/libmsodbcsql-18.3.so.1.1}'
-mssql_server = os.getenv('LEGACY_DB_HOST')
-mssql_server_port = '1433'
-mssql_database = os.getenv('LEGACY_DB_NAME')
-mssql_username = os.getenv('LEGACY_DB_USERNAME')
-mssql_password = os.getenv('LEGACY_DB_PASSWORD')
-
-visit_api_host = os.getenv('VISITS_API_HOST')
-visit_api_token = os.getenv('VISITS_API_TOKEN')
 
 def setup_logging():
     logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
     return logging.getLogger()
 
-def get_db_connection():
-    return pyodbc.connect(
-        f"Driver={mssql_driver};"
-        f"Server={mssql_server},{mssql_server_port};"
-        f"Database={mssql_database};"
-        f"UID={mssql_username};"
-        f"PWD={mssql_password};")
 
-def close_db_connection(connection):
-    del connection
+def convey():
+    logger = setup_logging()
+    logger.info("conveyor: start")
 
-def query(query, connection):
-    return pd.read_sql(query, connection)
+    d = datetime.today() - timedelta(days=1)
+
+    logger.info(f"conveyor: gathering visits since {d}")
+
+    try:
+        visits = get_visits(d.strftime('%Y-%m-%d'))
+    except Exception as ex:
+        logger.error(f"get_visits: {ex}")
+
+    for index, visit in visits.iterrows():
+        try:
+            store_visit(visit)
+        except Exception as ex:
+            logger.error(f"store_visit: {ex}")
+
+    logger.info("conveyor: complete")
+
 
 if __name__ == '__main__':
-    logger = setup_logging()
-    logger.info("conveyor start")
-
-    # connection = get_db_connection()
-
-    #date = date.strftime("%Y-%m-%d")  # convert to format yyyy-mm-dd
-
-    # build sql for legacy i/c visits
-    #sql = ("SELECT * FROM  WHERE checkin_date > '{date}'")
-
-    #data = query(sql, connection)
-
-    # close_db_connection(connection)
-
-    logger.info("conveyor complete")
+    convey()
