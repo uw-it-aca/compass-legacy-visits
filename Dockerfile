@@ -51,5 +51,5 @@ USER acait
 
 RUN . /app/bin/activate && pip install -r requirements.txt
 
-CMD ["bash", "-c", "/app/docker/app_start.sh"]
+CMD ["bash", "/app/docker/app_start.sh"]
 
