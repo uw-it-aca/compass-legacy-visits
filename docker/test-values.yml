@@ -90,7 +90,7 @@ externalSecrets:
           property: proxy-id
         - name: proxy-hostname
           property: proxy-hostname
-    - name: test.compass.uw.edu-shared-secrets
+    - name: compass-test-visits-shared-secrets
       externalKey: compass/shared/secrets
       data:
         - name: person-db-user
@@ -131,21 +131,21 @@ environmentVariablesSecrets:
     secretKey: legacy-db-password
   personDBUser:
     name: UW_PERSON_DB_USERNAME
-    secretName: test.compass.uw.edu-shared-secrets
+    secretName: compass-test-visits-shared-secrets
     secretKey: person-db-user
   personDBPass:
     name: UW_PERSON_DB_PASSWORD
-    secretName: test.compass.uw.edu-shared-secrets
+    secretName: compass-test-visits-shared-secrets
     secretKey: person-db-pass
   personDBHost:
     name: UW_PERSON_DB_HOSTNAME
-    secretName: test.compass.uw.edu-shared-secrets
+    secretName: compass-test-visits-shared-secrets
     secretKey: person-db-host
   personDBPort:
     name: UW_PERSON_DB_PORT
-    secretName: test.compass.uw.edu-shared-secrets
+    secretName: compass-test-visits-shared-secrets
     secretKey: person-db-port
   personDBDatabase:
     name: UW_PERSON_DB_DATABASE
-    secretName: test.compass.uw.edu-shared-secrets
+    secretName: compass-test-visits-shared-secrets
     secretKey: person-db-database
