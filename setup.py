@@ -27,6 +27,7 @@ setup(
         'pyodbc<5',
         'pandas~=1.1',
         'urllib3~=1.25',
+        'requests',
         'commonconf',
         'pymssql==2.2.2',
         'axdd-person-client>=1.1.18',

@@ -5,6 +5,8 @@
 
 from visits.dao.legacy import get_visits
 from visits.dao.compass import store_visit
+from visits.exceptions import (
+    MissingCheckInTime, MissingCheckOutTime, UnknownNetID)
 from datetime import datetime, timedelta
 import pandas
 import sys
@@ -34,9 +36,12 @@ def convey(hours=48):
         try:
             visit_data = store_visit(visit)
             logger.info(f"store_visit: added {visit_data['student_netid']} "
-                        f"for {visit_data['course_code']} "
-                        f"at {visit_data['checkin_date']}")
-        except Exception as ex:
+                        f"for {visit_data['course_code']}: "
+                        f"{visit_data['checkin_date']} to "
+                        f"{visit_data['checkout_date']}")
+        except MissingCheckInTime as ex:
+            logger.info(f"store_visit: {ex}")
+        except (Exception, MissingCheckOutTime, UnknownNetID) as ex:
             logger.error(f"store_visit: {ex}")
 
     logger.info("conveyor: complete")
