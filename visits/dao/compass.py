@@ -6,7 +6,6 @@ from visits.exceptions import (
     MissingCheckInTime, MissingCheckOutTime, UnknownNetID)
 from datetime import datetime
 import requests
-import json
 import pytz
 import os
 
@@ -60,12 +59,16 @@ def _get_date(visit, in_or_out):
 def _store_visit_data(visit_data):
     host = os.getenv('VISITS_API_HOST')
     token = os.getenv('VISITS_API_TOKEN')
-    headers = {'Authorization': f"Token {token}"}
+    headers = {
+        'Authorization': f"Token {token}",
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
     url = f"https://{host}/api/v1/visit/omad"
 
-    response = requests.post(
-        url, headers=headers, json=json.dumps(visit_data))
+    response = requests.post(url, headers=headers, json=visit_data)
 
     if response.status_code not in [200, 201]:
         raise Exception(
-            f"{response.status_code}: for {visit_data['student_netid']}")
+            f"{response.status_code}: {visit_data['student_netid']:}"
+            f"{response.text}")
