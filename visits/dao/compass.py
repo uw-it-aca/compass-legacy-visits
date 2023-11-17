@@ -1,10 +1,9 @@
 # Copyright 2023 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
 
+from visits.dao.person import get_netid_from_student_number
 from visits.exceptions import (
     MissingCheckInTime, MissingCheckOutTime, UnknownNetID)
-from commonconf.backends import use_configparser_backend
-from uw_person_client import UWPersonClient
 from datetime import datetime
 import requests
 import json
@@ -12,16 +11,9 @@ import pytz
 import os
 
 
-use_configparser_backend("/app/person.cfg", "compass")
-
-
-uw_person = UWPersonClient()
-known_netids = {}
-
-
 def store_visit(visit):
     student_no = str(visit['student_no']).zfill(7)
-    netid = _get_netid(student_no)
+    netid = get_netid_from_student_number(student_no)
     visit_data = {
         'student_netid': netid,
         'visit_type': _get_visit_type(visit),
@@ -45,20 +37,6 @@ def store_visit(visit):
     return visit_data
 
 
-def _store_visit_data(visit_data):
-    host = os.getenv('VISITS_API_HOST')
-    token = os.getenv('VISITS_API_TOKEN')
-    headers = {'Authorization': f"Token {token}"}
-    url = f"http://{host}/api/v1/visit/omad"
-
-    response = requests.post(
-        url, headers=headers, json=json.dumps(visit_data))
-
-    if response.status_code not in [200, 201]:
-        raise Exception(
-            f"{response.status_code}: for {visit_data['student_netid']}")
-
-
 def _get_visit_type(visit):
     return visit['Contact_Type']
 
@@ -79,19 +57,15 @@ def _get_date(visit, in_or_out):
         second=time.second).astimezone(pytz.utc).isoformat()
 
 
-def _get_netid(student_number):
-    try:
-        return known_netids[student_number]
-    except KeyError:
-        person = uw_person.get_person_by_student_number(
-            student_number, include_employee=False, include_student=True,
-            include_student_transcripts=False,
-            include_student_transfers=False, include_student_sports=False,
-            include_student_advisers=False, include_student_majors=False,
-            include_student_pending_majors=False,
-            include_student_holds=False, include_student_degrees=False)
-        if person.uwnetid is None:
-            raise UnknownNetID(f"Unknown netid for {student_number}")
+def _store_visit_data(visit_data):
+    host = os.getenv('VISITS_API_HOST')
+    token = os.getenv('VISITS_API_TOKEN')
+    headers = {'Authorization': f"Token {token}"}
+    url = f"http://{host}/api/v1/visit/omad"
 
-        known_netids[student_number] = person.uwnetid
-        return person.uwnetid
+    response = requests.post(
+        url, headers=headers, json=json.dumps(visit_data))
+
+    if response.status_code not in [200, 201]:
+        raise Exception(
+            f"{response.status_code}: for {visit_data['student_netid']}")
