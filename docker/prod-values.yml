@@ -8,7 +8,7 @@ lifecycle:
   enabled: false
 
 repo: compass-visits
-instance: test
+instance: prod
 
 cronjob:
   enabled: false
@@ -20,7 +20,7 @@ daemon:
       replicaCount: 1
       command: ["bash"]
       command: ["/scripts/task_daemon.sh"]
-      args: ["--cron", "3 5 * * *", "conveyor", "24"]
+      args: ["--cron", "3 0-3,15-23 * * *", "conveyor", "12"]
       resources:
         limits:
           cpu: 500m
@@ -35,22 +35,22 @@ daemon:
             - name: PROXY_ID_KEY
               valueFrom:
                 secretKeyRef:
-                  name: compass-test-visits-common-secrets
+                  name: compass-visits-common-secrets
                   key: proxy-id-key
             - name: PROXY_ID
               valueFrom:
                 secretKeyRef:
-                  name: compass-test-visits-common-secrets
+                  name: compass-visits-common-secrets
                   key: proxy-id
             - name: PROXY_HOSTNAME
               valueFrom:
                 secretKeyRef:
-                  name: compass-test-visits-common-secrets
+                  name: compass-visits-common-secrets
                   key: proxy-hostname
             - name: TARGET_HOSTNAME
               valueFrom:
                 secretKeyRef:
-                  name: compass-test-visits-common-secrets
+                  name: compass-visits-common-secrets
                   key: legacy-db-host
             - name: TARGET_PORT
               value: "1433"
@@ -63,21 +63,21 @@ daemon:
 
 environmentVariables:
   - name: ENV
-    value: test
+    value: prod
   - name: UW_PERSON_CLIENT_ENV
     value: PROD
   - name: VISITS_API_HOST
-    value: test.compass.uw.edu
+    value: compass.uw.edu
 
 externalSecrets:
   enabled: true
   secrets:
-    - name: compass-test-visits-secrets
-      externalKey: compass-visits/test/secrets
+    - name: compass-visits-secrets
+      externalKey: compass-visits/prod/secrets
       data:
         - name: visits-api-token
           property: visits-api-token
-    - name: compass-test-visits-common-secrets
+    - name: compass-visits-common-secrets
       externalKey: compass-visits/common/secrets
       data:
         - name: legacy-db-host
@@ -94,7 +94,7 @@ externalSecrets:
           property: proxy-id
         - name: proxy-hostname
           property: proxy-hostname
-    - name: compass-test-visits-shared-secrets
+    - name: compass-visits-shared-secrets
       externalKey: compass/shared/secrets
       data:
         - name: person-db-user
@@ -111,41 +111,41 @@ externalSecrets:
 environmentVariablesSecrets:
   compassVisitAPIToken:
     name: VISITS_API_TOKEN
-    secretName: compass-test-visits-secrets
+    secretName: compass-visits-secrets
     secretKey: visits-api-token
   legacyDBHost:
     name: LEGACY_DB_HOST
-    secretName: compass-test-visits-common-secrets
+    secretName: compass-visits-common-secrets
     secretKey: legacy-db-host
   legacyDBName:
     name: LEGACY_DB_NAME
-    secretName: compass-test-visits-common-secrets
+    secretName: compass-visits-common-secrets
     secretKey: legacy-db-name
   legacyDBUsername:
     name: LEGACY_DB_USERNAME
-    secretName: compass-test-visits-common-secrets
+    secretName: compass-visits-common-secrets
     secretKey: legacy-db-username
   legacyDBPassword:
     name: LEGACY_DB_PASSWORD
-    secretName: compass-test-visits-common-secrets
+    secretName: compass-visits-common-secrets
     secretKey: legacy-db-password
   personDBUser:
     name: UW_PERSON_DB_USERNAME
-    secretName: compass-test-visits-shared-secrets
+    secretName: compass-visits-shared-secrets
     secretKey: person-db-user
   personDBPass:
     name: UW_PERSON_DB_PASSWORD
-    secretName: compass-test-visits-shared-secrets
+    secretName: compass-visits-shared-secrets
     secretKey: person-db-pass
   personDBHost:
     name: UW_PERSON_DB_HOSTNAME
-    secretName: compass-test-visits-shared-secrets
+    secretName: compass-visits-shared-secrets
     secretKey: person-db-host
   personDBPort:
     name: UW_PERSON_DB_PORT
-    secretName: compass-test-visits-shared-secrets
+    secretName: compass-visits-shared-secrets
     secretKey: person-db-port
   personDBDatabase:
     name: UW_PERSON_DB_DATABASE
-    secretName: compass-test-visits-shared-secrets
+    secretName: compass-visits-shared-secrets
     secretKey: person-db-database
