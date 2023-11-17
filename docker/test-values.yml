@@ -68,7 +68,7 @@ environmentVariables:
   - name: UW_PERSON_CLIENT_ENV
     value: PROD
   - name: VISITS_API_HOST
-    value: compass-prod-test
+    value: test.compass.uw.edu
 
 externalSecrets:
   enabled: true

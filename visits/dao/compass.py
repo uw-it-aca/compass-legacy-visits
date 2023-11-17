@@ -61,7 +61,7 @@ def _store_visit_data(visit_data):
     host = os.getenv('VISITS_API_HOST')
     token = os.getenv('VISITS_API_TOKEN')
     headers = {'Authorization': f"Token {token}"}
-    url = f"http://{host}/api/v1/visit/omad"
+    url = f"https://{host}/api/v1/visit/omad"
 
     response = requests.post(
         url, headers=headers, json=json.dumps(visit_data))
