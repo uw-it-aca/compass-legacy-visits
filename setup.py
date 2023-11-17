@@ -31,6 +31,7 @@ setup(
         'commonconf',
         'pymssql==2.2.2',
         'axdd-person-client>=1.1.18',
+        'prometheus_client',
     ],
     license='Apache License, Version 2.0',
     description='Collects Instruction Center Visit data',
