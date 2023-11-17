@@ -1,13 +1,14 @@
+#!/usr/bin/env python
+
 # Copyright 2023 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
-
-#!/usr/bin/env python
 
 from visits.dao.legacy import get_visits
 from visits.dao.compass import store_visit
 from visits.exceptions import (
     MissingCheckInTime, MissingCheckOutTime, UnknownNetID)
 from datetime import datetime, timedelta
+import argparse
 import pandas
 import sys
 import logging
@@ -25,10 +26,12 @@ def convey(hours=48):
 
     since_date = datetime.today() - timedelta(hours=hours)
 
-    logger.info(f"conveyor: gathering visits since {since_date}")
+    logger.info("conveyor: gather visits for previous "
+                f"{hours} hours ({since_date})")
 
     try:
         visits = get_visits(since_date)
+        logger.info(f"store_visit: processing {len(visits)} legacy visits")
     except Exception as ex:
         logger.error(f"get_visits: {ex}")
 
@@ -48,4 +51,11 @@ def convey(hours=48):
 
 
 if __name__ == '__main__':
-    convey(48)
+    parser = argparse.ArgumentParser(
+        description='Convey legacy DB I/C Visits into Compass')
+    parser.add_argument(
+        'hours', type=int,
+        help='previous hours of events to convey')
+    args = parser.parse_args()
+
+    convey(args.hours)

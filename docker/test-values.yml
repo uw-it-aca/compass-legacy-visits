@@ -16,12 +16,12 @@ cronjob:
 daemon:
   enabled: true
   daemons:
-    - name: expire-endorsees
+    - name: conveyor
       replicaCount: 1
       command: ["bash"]
-      args: ["/app/docker/app_start.sh"]
+      args: ["/scripts/app_start.sh"]
 #      command: ["/scripts/task_daemon.sh"]
-#      args: ["--cron", "3,33 7-18 * * 1-5", "conveyor"]
+#      args: ["--cron", "3,33 7-18 * * 1-5", "conveyor", "72"]
       resources:
         limits:
           cpu: 500m

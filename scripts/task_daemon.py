@@ -7,6 +7,9 @@ from call_command import CallCommand
 import sys
 
 
+TASK_DIRECTORY="/app/visits/tasks"
+
+
 #
 # Run task on a continuous loop
 # periodically based on a "--delay <seconds>" or
@@ -46,7 +49,7 @@ def main():
     if loop_delay is None and cron_spec is None:
         loop_delay = default_loop_delay
     CallCommand(is_daemon=True,
-                command=f'/app/visits/tasks/{command}.py',
+                command=f'{TASK_DIRECTORY}/{command}.py',
                 options=options,
                 cron_spec=cron_spec,
                 loop_delay=loop_delay).run()

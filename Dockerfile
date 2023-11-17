@@ -40,16 +40,22 @@ RUN python3 -m venv /app/
 
 RUN /app/bin/pip install wheel croniter
 
-ADD . /app/
+ADD visits /app/visits/
+ADD db_config /app/db_config
+ADD setup.py /app/
+ADD requirements.txt /app/
+ADD scripts /scripts/
+ADD docker/app_init.sh /scripts/
+ADD docker/app_start.sh /scripts/
 
 RUN groupadd -r acait -g 1000 && \
     useradd -u 1000 -rm -g acait -d /home/acait -s /bin/bash -c "container user" acait && \
     chown -R acait:acait /app /home/acait && \
-    chmod -R +x /app/scripts /app/visits/tasks
+    chmod -R +x /scripts/ /app/visits/tasks/
 
 USER acait
 
 RUN . /app/bin/activate && pip install -r requirements.txt
 
-CMD ["bash", "/app/docker/app_start.sh"]
+CMD ["bash", "/scripts/app_start.sh"]
 
