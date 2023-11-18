@@ -1,0 +1,151 @@
+deployment:
+  enabled: false
+
+service:
+  enabled: false
+
+lifecycle:
+  enabled: false
+
+repo: compass-visits
+instance: prod
+
+cronjob:
+  enabled: false
+
+daemon:
+  enabled: true
+  daemons:
+    - name: conveyor
+      replicaCount: 1
+      command: ["bash"]
+      command: ["/scripts/task_daemon.sh"]
+      args: ["--cron", "3 0-3,15-23 * * *", "conveyor", "12"]
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 50m
+          memory: 128Mi
+      sidecarContainers:
+        forwarder:
+          image: "us-docker.pkg.dev/uwit-mci-axdd/containers/uw-ssh-client:89695b2"
+          environmentVariables:
+            - name: PROXY_ID_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: compass-visits-common-secrets
+                  key: proxy-id-key
+            - name: PROXY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: compass-visits-common-secrets
+                  key: proxy-id
+            - name: PROXY_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: compass-visits-common-secrets
+                  key: proxy-hostname
+            - name: TARGET_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: compass-visits-common-secrets
+                  key: legacy-db-host
+            - name: TARGET_PORT
+              value: "1433"
+            - name: LOCAL_PORT
+              value: "1433"
+          command:
+            - "sh"
+            - "-c"
+            - 'mkdir -m 0700 ~/.ssh && echo "${PROXY_ID_KEY}" > ~/.ssh/id_ecdsa && chmod 400 ~/.ssh/id_ecdsa && ssh ${PROXY_ID}@${PROXY_HOSTNAME} -o StrictHostKeyChecking=no -N -L 127.0.0.1:${LOCAL_PORT}:${TARGET_HOSTNAME}:${TARGET_PORT}'
+
+environmentVariables:
+  - name: ENV
+    value: prod
+  - name: UW_PERSON_CLIENT_ENV
+    value: PROD
+  - name: VISITS_API_HOST
+    value: compass.uw.edu
+
+externalSecrets:
+  enabled: true
+  secrets:
+    - name: compass-visits-secrets
+      externalKey: compass-visits/prod/secrets
+      data:
+        - name: visits-api-token
+          property: visits-api-token
+    - name: compass-visits-common-secrets
+      externalKey: compass-visits/common/secrets
+      data:
+        - name: legacy-db-host
+          property: legacy-db-host
+        - name: legacy-db-name
+          property: legacy-db-name
+        - name: legacy-db-username
+          property: legacy-db-username
+        - name: legacy-db-password
+          property: legacy-db-password
+        - name: proxy-id-key
+          property: proxy-id-key
+        - name: proxy-id
+          property: proxy-id
+        - name: proxy-hostname
+          property: proxy-hostname
+    - name: compass-visits-shared-secrets
+      externalKey: compass/shared/secrets
+      data:
+        - name: person-db-user
+          property: person-db-user
+        - name: person-db-pass
+          property: person-db-pass
+        - name: person-db-host
+          property: person-db-host
+        - name: person-db-port
+          property: person-db-port
+        - name: person-db-database
+          property: person-db-database
+
+environmentVariablesSecrets:
+  compassVisitAPIToken:
+    name: VISITS_API_TOKEN
+    secretName: compass-visits-secrets
+    secretKey: visits-api-token
+  legacyDBHost:
+    name: LEGACY_DB_HOST
+    secretName: compass-visits-common-secrets
+    secretKey: legacy-db-host
+  legacyDBName:
+    name: LEGACY_DB_NAME
+    secretName: compass-visits-common-secrets
+    secretKey: legacy-db-name
+  legacyDBUsername:
+    name: LEGACY_DB_USERNAME
+    secretName: compass-visits-common-secrets
+    secretKey: legacy-db-username
+  legacyDBPassword:
+    name: LEGACY_DB_PASSWORD
+    secretName: compass-visits-common-secrets
+    secretKey: legacy-db-password
+  personDBUser:
+    name: UW_PERSON_DB_USERNAME
+    secretName: compass-visits-shared-secrets
+    secretKey: person-db-user
+  personDBPass:
+    name: UW_PERSON_DB_PASSWORD
+    secretName: compass-visits-shared-secrets
+    secretKey: person-db-pass
+  personDBHost:
+    name: UW_PERSON_DB_HOSTNAME
+    secretName: compass-visits-shared-secrets
+    secretKey: person-db-host
+  personDBPort:
+    name: UW_PERSON_DB_PORT
+    secretName: compass-visits-shared-secrets
+    secretKey: person-db-port
+  personDBDatabase:
+    name: UW_PERSON_DB_DATABASE
+    secretName: compass-visits-shared-secrets
+    secretKey: person-db-database
