@@ -4,6 +4,7 @@
 import pyodbc
 import pandas
 from datetime import datetime, timedelta
+import warnings
 import os
 
 
@@ -53,6 +54,10 @@ def _run_query(database, query):
                 f"PWD={password}"
 
     con = pyodbc.connect(constring)
-    df = pandas.read_sql(query, con)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore')
+        df = pandas.read_sql(query, con)
+
     del con
     return df

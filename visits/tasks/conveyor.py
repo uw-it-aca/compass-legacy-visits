@@ -11,20 +11,26 @@ from datetime import datetime, timedelta
 import argparse
 import pandas
 import sys
+import os
 import logging
 
 
 def setup_logging():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('conveyor')
     logger.setLevel(logging.DEBUG)
+    logger.propagate = False
+
+    formatter = logging.Formatter(
+        '%(asctime)s: %(levelname)s: %(name)s: %(message)s')
 
     handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
-    handler.addFilter(lambda record: record.levelno <= logging.INFO)
+    handler.addFilter(lambda record: record.levelno < logging.WARN)
+    handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.WARNING)
+    handler = logging.StreamHandler(sys.stderr)
+    handler.addFilter(lambda record: record.levelno > logging.INFO)
+    handler.setFormatter(formatter)
     logger.addHandler(handler)
 
     return logger
@@ -35,18 +41,18 @@ def convey(hours=48):
 
     since_date = datetime.today() - timedelta(hours=hours)
 
-    logger.info(f"conveyor: gather previous {hours} hours ({since_date})")
+    logger.info(f"gather previous {hours} hours ({since_date})")
 
     try:
         visits = get_visits(since_date)
-        logger.info(f"store_visit: processing {len(visits)} legacy visits")
+        logger.info(f"processing {len(visits)} legacy visits")
     except Exception as ex:
         logger.error(f"get_visits: {ex}")
 
     for index, visit in visits.iterrows():
         try:
             visit_data = store_visit(visit)
-            logger.info(f"store_visit: added {visit_data['student_netid']} "
+            logger.info(f"add {visit_data['student_netid']} "
                         f"for {visit_data['course_code']}: "
                         f"{visit_data['checkin_date']} to "
                         f"{visit_data['checkout_date']}")
@@ -55,7 +61,7 @@ def convey(hours=48):
         except (Exception, MissingCheckOutTime, UnknownNetID) as ex:
             logger.error(f"store_visit: {ex}")
 
-    logger.info("conveyor: complete")
+    logger.info("complete")
 
 
 if __name__ == '__main__':
