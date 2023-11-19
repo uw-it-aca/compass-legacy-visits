@@ -15,19 +15,27 @@ import logging
 
 
 def setup_logging():
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-    return logging.getLogger()
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    handler.addFilter(lambda record: record.levelno <= logging.INFO)
+    logger.addHandler(handler)
+
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.WARNING)
+    logger.addHandler(handler)
+
+    return logger
 
 
 def convey(hours=48):
-
     logger = setup_logging()
-    logger.info("conveyor: start")
 
     since_date = datetime.today() - timedelta(hours=hours)
 
-    logger.info("conveyor: gather visits for previous "
-                f"{hours} hours ({since_date})")
+    logger.info(f"conveyor: gather previous {hours} hours ({since_date})")
 
     try:
         visits = get_visits(since_date)
