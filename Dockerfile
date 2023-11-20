@@ -40,18 +40,17 @@ RUN python3 -m venv /app/
 
 RUN /app/bin/pip install wheel croniter
 
-ADD visits /app/visits/
-ADD db_config /app/db_config
-ADD setup.py /app/
-ADD requirements.txt /app/
-ADD scripts /scripts/
-ADD docker/app_init.sh /scripts/
-ADD docker/app_start.sh /scripts/
-
 RUN groupadd -r acait -g 1000 && \
     useradd -u 1000 -rm -g acait -d /home/acait -s /bin/bash -c "container user" acait && \
-    chown -R acait:acait /app /home/acait && \
-    chmod -R +x /scripts/ /app/visits/tasks/
+    chown -R acait:acait /app /home/acait
+
+ADD --chown=acait:acait visits /app/visits/
+ADD --chown=acait:acait db_config /app/db_config
+ADD --chown=acait:acait setup.py requirements.txt /app/
+ADD --chown=acait:acait scripts /scripts/
+ADD --chown=acait:acait docker/app_init.sh docker/app_start.sh /scripts/
+
+RUN chmod -R +x /scripts/ /app/visits/tasks/
 
 USER acait
 
