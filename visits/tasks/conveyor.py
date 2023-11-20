@@ -15,29 +15,15 @@ import os
 import logging
 
 
-def setup_logging():
-    logger = logging.getLogger('conveyor')
-    logger.setLevel(logging.DEBUG)
-    logger.propagate = False
-
-    formatter = logging.Formatter(
-        '%(asctime)s: %(levelname)s: %(name)s: %(message)s')
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.addFilter(lambda record: record.levelno < logging.WARN)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    handler = logging.StreamHandler(sys.stderr)
-    handler.addFilter(lambda record: record.levelno > logging.INFO)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    return logger
+def setup_logging(name):
+    # send all logging to stderr.  task_daemon.py invokes this
+    # via subprocess check_output which siphons off stdout
+    logging.basicConfig(level=logging.DEBUG)
+    return logging.getLogger(name)
 
 
 def convey(hours=48):
-    logger = setup_logging()
+    logger = setup_logging("convey")
 
     since_date = datetime.today() - timedelta(hours=hours)
 
