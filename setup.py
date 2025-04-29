@@ -1,7 +1,5 @@
-# Copyright 2023 UW-IT, University of Washington
+# Copyright 2025 UW-IT, University of Washington
 # SPDX-License-Identifier: Apache-2.0
-
-#!/usr/bin/env python
 
 import os
 from setuptools import setup
