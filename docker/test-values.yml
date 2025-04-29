@@ -35,17 +35,17 @@ daemon:
             - name: PROXY_ID_KEY
               valueFrom:
                 secretKeyRef:
-                  name: compass-test-visits-common-secrets
+                  name: shared-proxy-secrets
                   key: proxy-id-key
             - name: PROXY_ID
               valueFrom:
                 secretKeyRef:
-                  name: compass-test-visits-common-secrets
+                  name: shared-proxy-secrets
                   key: proxy-id
             - name: PROXY_HOSTNAME
               valueFrom:
                 secretKeyRef:
-                  name: compass-test-visits-common-secrets
+                  name: shared-proxy-secrets
                   key: proxy-hostname
             - name: TARGET_HOSTNAME
               valueFrom:
@@ -88,12 +88,6 @@ externalSecrets:
           property: legacy-db-username
         - name: legacy-db-password
           property: legacy-db-password
-        - name: proxy-id-key
-          property: proxy-id-key
-        - name: proxy-id
-          property: proxy-id
-        - name: proxy-hostname
-          property: proxy-hostname
     - name: compass-test-visits-shared-secrets
       externalKey: compass/shared/secrets
       data:
@@ -107,6 +101,15 @@ externalSecrets:
           property: person-db-port
         - name: person-db-database
           property: person-db-database
+    - name: shared-proxy-secrets
+      externalKey: shared/proxies/uw_ssh_tunnel
+      data:
+        - name: proxy-id-key
+          property: key
+        - name: proxy-id
+          property: username
+        - name: proxy-hostname
+          property: hostname
 
 environmentVariablesSecrets:
   compassVisitAPIToken:
